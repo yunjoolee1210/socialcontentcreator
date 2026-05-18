@@ -32,16 +32,10 @@ export default function LandingPage() {
           </div>
           <div className="flex items-center gap-3">
             <Link
-              href="/login"
-              className="text-sm text-muted-foreground hover:text-foreground transition-colors"
-            >
-              로그인
-            </Link>
-            <Link
-              href="/register"
+              href="/dashboard"
               className="px-4 py-2 text-sm font-medium bg-primary text-primary-foreground rounded-lg hover:opacity-90 transition-opacity"
             >
-              무료 시작
+              대시보드로 가기
             </Link>
           </div>
         </div>
@@ -75,10 +69,10 @@ export default function LandingPage() {
 
             <div className="flex flex-col sm:flex-row items-center justify-center gap-4 animate-fade-in stagger-3">
               <Link
-                href="/register"
+                href="/dashboard"
                 className="group flex items-center gap-2 px-8 py-3 bg-primary text-primary-foreground rounded-xl font-medium hover:opacity-90 transition-all shadow-lg shadow-primary/25"
               >
-                무료로 시작하기
+                대시보드로 시작하기
                 <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
               </Link>
               <Link
@@ -274,11 +268,11 @@ export default function LandingPage() {
               무료 플랜으로 시작해보세요.
             </p>
             <Link
-              href="/register"
+              href="/dashboard"
               className="inline-flex items-center gap-2 px-8 py-4 bg-primary text-primary-foreground rounded-xl font-medium hover:opacity-90 transition-all shadow-lg shadow-primary/25 text-lg"
             >
               <Sparkles className="w-5 h-5" />
-              무료로 시작하기
+              대시보드 열기
             </Link>
           </div>
         </div>

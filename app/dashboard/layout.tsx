@@ -2,15 +2,13 @@
 
 import { usePathname } from "next/navigation";
 import Link from "next/link";
-import { useSession, signOut } from "next-auth/react";
 import { 
   LayoutDashboard, 
   Search, 
   FileText, 
   Share2, 
   BarChart3, 
-  Settings, 
-  LogOut,
+  Settings,
   Sparkles,
   Menu,
   X
@@ -33,7 +31,6 @@ export default function DashboardLayout({
   children: React.ReactNode;
 }) {
   const pathname = usePathname();
-  const { data: session } = useSession();
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
   return (
@@ -93,24 +90,17 @@ export default function DashboardLayout({
           <div className="p-4 border-t border-border">
             <div className="flex items-center gap-3 px-3 py-2 mb-2 rounded-xl">
               <div className="w-8 h-8 rounded-full bg-gradient-to-br from-blue-500 to-cyan-500 flex items-center justify-center text-white font-bold">
-                {session?.user?.name?.[0] || session?.user?.email?.[0] || "U"}
+                U
               </div>
               <div className="flex-1 min-w-0">
                 <p className="text-sm font-medium truncate">
-                  {session?.user?.name || "사용자"}
+                  사용자
                 </p>
                 <p className="text-xs text-muted-foreground truncate">
-                  {session?.user?.email}
+                  user@example.com
                 </p>
               </div>
             </div>
-            <button
-              onClick={() => signOut({ callbackUrl: "/" })}
-              className="w-full flex items-center gap-3 px-3 py-2 rounded-xl text-sm font-medium text-red-400 hover:bg-red-500/10 transition-colors"
-            >
-              <LogOut className="w-5 h-5" />
-              로그아웃
-            </button>
           </div>
         </div>
       </aside>
