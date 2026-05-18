@@ -1,0 +1,97 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id            String   @id @default(cuid())
+  name          String?
+  email         String   @unique
+  password      String?
+  image         String?
+  role          String   @default("USER")
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  keywords      Keyword[]
+  socialPosts   SocialPost[]
+  logs          Log[]
+}
+
+model Keyword {
+  id               String   @id @default(cuid())
+  userId           String
+  keyword          String
+  category         String
+  tone             String
+  platforms        String[]
+  postingTime      String
+  ontologyDomain   String?
+  semanticKeywords String[]
+  embedding        Unsupported("vector")?
+  createdAt        DateTime @default(now())
+
+  user             User @relation(fields: [userId], references: [id])
+  articles         Article[]
+}
+
+model Article {
+  id              String   @id @default(cuid())
+  keywordId       String
+  title           String
+  summary         String
+  content         String
+  imageUrl        String?
+  sourceUrl       String   @unique
+  seoDescription  String?
+  ontologyTags    String[]
+  entities        String[]
+  sentiment       String?
+  trendScore      Float?
+  publishedAt     DateTime
+  createdAt       DateTime @default(now())
+
+  keyword         Keyword @relation(fields: [keywordId], references: [id])
+  socialPosts     SocialPost[]
+}
+
+model SocialPost {
+  id               String   @id @default(cuid())
+  userId           String
+  articleId        String
+  platform         String
+  content          String
+  hashtags         String[]
+  imageUrl         String?
+  scheduledAt      DateTime?
+  status           String   @default("PENDING")
+  externalPostId   String?
+  createdAt        DateTime @default(now())
+
+  user             User @relation(fields: [userId], references: [id])
+  article          Article @relation(fields: [articleId], references: [id])
+}
+
+model Schedule {
+  id            String   @id @default(cuid())
+  keywordId     String
+  cron          String
+  enabled       Boolean  @default(true)
+  createdAt     DateTime @default(now())
+}
+
+model Log {
+  id            String   @id @default(cuid())
+  userId        String?
+  type          String
+  message       String
+  status        String
+  metadata      Json?
+  createdAt     DateTime @default(now())
+
+  user          User? @relation(fields: [userId], references: [id])
+}
