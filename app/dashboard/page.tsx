@@ -1,182 +1,195 @@
 "use client";
 
+import { useState } from "react";
 import { 
-  TrendingUp, 
-  FileText, 
-  Share2, 
-  AlertCircle,
-  ArrowUpRight,
-  ArrowDownRight
+  Sparkles, 
+  Search, 
+  Clock, 
+  CheckCircle2, 
+  Instagram, 
+  Twitter, 
+  Send,
+  Loader2,
+  RefreshCw,
+  Image as ImageIcon
 } from "lucide-react";
-import Link from "next/link";
-import {
-  AreaChart,
-  Area,
-  XAxis,
-  YAxis,
-  CartesianGrid,
-  Tooltip,
-  ResponsiveContainer
-} from "recharts";
-
-const mockData = [
-  { name: "월", 수집: 120, 게시: 45 },
-  { name: "화", 수집: 180, 게시: 62 },
-  { name: "수", 수집: 150, 게시: 55 },
-  { name: "목", 수집: 210, 게시: 85 },
-  { name: "금", 수집: 190, 게시: 70 },
-  { name: "토", 수집: 90, 게시: 30 },
-  { name: "일", 수집: 110, 게시: 40 },
-];
+import { generateContent } from "../actions";
 
 export default function DashboardPage() {
+  const [keyword, setKeyword] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [step, setStep] = useState(0);
+  const [results, setResults] = useState<any[] | null>(null);
+
+  const handleGenerate = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!keyword.trim()) return;
+
+    setLoading(true);
+    setResults(null);
+    setStep(1); // 검색 중
+    
+    setTimeout(() => setStep(2), 1000); // 토픽 추출 중
+    setTimeout(() => setStep(3), 2000); // 생성 중
+
+    try {
+      const res = await generateContent(keyword);
+      if (res.success) {
+        setResults(res.data);
+        setStep(4); // 완료
+      }
+    } catch (error) {
+      console.error(error);
+      alert("오류가 발생했습니다.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return (
-    <div className="space-y-8 animate-fade-in">
-      <div>
-        <h1 className="text-3xl font-bold tracking-tight mb-2">대시보드</h1>
-        <p className="text-muted-foreground">
-          자동화 파이프라인의 현재 상태와 주요 지표를 확인하세요.
+    <div className="max-w-5xl mx-auto space-y-8 animate-fade-in">
+      <div className="text-center space-y-4 mb-12">
+        <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full border border-primary/20 bg-primary/10 text-primary text-sm font-medium">
+          <Sparkles className="w-4 h-4" />
+          핵심 기능: AI 콘텐츠 자동 생성
+        </div>
+        <h1 className="text-4xl font-bold tracking-tight">
+          키워드만 입력하세요.<br />
+          <span className="text-transparent bg-clip-text bg-gradient-to-r from-purple-500 to-pink-500">
+            24시간 트렌드 분석 & Top 10 콘텐츠 생성
+          </span>
+        </h1>
+        <p className="text-muted-foreground max-w-2xl mx-auto">
+          최근 24시간 동안의 뉴스와 데이터를 수집하여, 가장 트렌디한 10개의 토픽을 추출하고 인스타그램/X 맞춤형 게시글을 작성합니다.
         </p>
       </div>
 
-      {/* Stats Grid */}
-      <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        {[
-          {
-            title: "오늘 수집 기사",
-            value: "148",
-            trend: "+12.5%",
-            isUp: true,
-            icon: FileText,
-            color: "text-blue-500",
-            bg: "bg-blue-500/10",
-          },
-          {
-            title: "오늘 생성 게시글",
-            value: "52",
-            trend: "+8.2%",
-            isUp: true,
-            icon: Share2,
-            color: "text-pink-500",
-            bg: "bg-pink-500/10",
-          },
-          {
-            title: "업로드 성공률",
-            value: "96.4%",
-            trend: "-1.2%",
-            isUp: false,
-            icon: TrendingUp,
-            color: "text-emerald-500",
-            bg: "bg-emerald-500/10",
-          },
-          {
-            title: "실패 작업",
-            value: "3",
-            trend: "0%",
-            isUp: true,
-            icon: AlertCircle,
-            color: "text-red-500",
-            bg: "bg-red-500/10",
-          },
-        ].map((stat, i) => (
-          <div
-            key={i}
-            className="p-6 rounded-2xl border border-border bg-card/50 glass relative overflow-hidden"
-          >
-            <div className="absolute top-0 right-0 p-4 opacity-10">
-              <stat.icon className={`w-16 h-16 ${stat.color}`} />
-            </div>
-            <div className="flex items-center gap-3 mb-4">
-              <div className={`w-10 h-10 rounded-xl ${stat.bg} flex items-center justify-center`}>
-                <stat.icon className={`w-5 h-5 ${stat.color}`} />
-              </div>
-              <h3 className="font-medium text-muted-foreground">{stat.title}</h3>
-            </div>
-            <div className="flex items-end gap-3">
-              <span className="text-3xl font-bold">{stat.value}</span>
-              <span className={`flex items-center text-sm font-medium mb-1 ${stat.isUp ? 'text-emerald-500' : 'text-red-500'}`}>
-                {stat.isUp ? <ArrowUpRight className="w-4 h-4 mr-0.5" /> : <ArrowDownRight className="w-4 h-4 mr-0.5" />}
-                {stat.trend}
-              </span>
-            </div>
+      <div className="bg-card/50 glass rounded-3xl p-6 border border-border shadow-xl">
+        <form onSubmit={handleGenerate} className="flex flex-col sm:flex-row gap-4">
+          <div className="relative flex-1">
+            <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
+            <input
+              type="text"
+              value={keyword}
+              onChange={(e) => setKeyword(e.target.value)}
+              placeholder="예: AI 마케팅, 비트코인, 테슬라..."
+              className="w-full h-14 pl-12 pr-4 rounded-2xl bg-background border border-border focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none transition-all text-lg"
+              disabled={loading}
+            />
           </div>
-        ))}
+          <button
+            type="submit"
+            disabled={loading || !keyword.trim()}
+            className="h-14 px-8 rounded-2xl bg-primary text-primary-foreground font-semibold flex items-center justify-center gap-2 hover:opacity-90 transition-opacity disabled:opacity-50"
+          >
+            {loading ? (
+              <Loader2 className="w-5 h-5 animate-spin" />
+            ) : (
+              <Sparkles className="w-5 h-5" />
+            )}
+            Top 10 생성하기
+          </button>
+        </form>
+
+        {/* Loading Steps */}
+        {loading && (
+          <div className="mt-8 grid grid-cols-1 sm:grid-cols-3 gap-4">
+            {[
+              { id: 1, title: "24시간 데이터 검색", icon: Clock },
+              { id: 2, title: "핵심 토픽 추출", icon: RefreshCw },
+              { id: 3, title: "콘텐츠 자동 작성", icon: Sparkles },
+            ].map((s) => (
+              <div 
+                key={s.id} 
+                className={`flex items-center gap-3 p-4 rounded-xl border transition-all duration-500 ${
+                  step >= s.id 
+                    ? 'border-primary bg-primary/5 text-primary' 
+                    : 'border-border bg-muted/30 text-muted-foreground'
+                }`}
+              >
+                {step > s.id ? (
+                  <CheckCircle2 className="w-5 h-5 text-emerald-500" />
+                ) : step === s.id ? (
+                  <Loader2 className="w-5 h-5 animate-spin" />
+                ) : (
+                  <s.icon className="w-5 h-5" />
+                )}
+                <span className="font-medium">{s.title}</span>
+              </div>
+            ))}
+          </div>
+        )}
       </div>
 
-      <div className="grid lg:grid-cols-3 gap-6">
-        {/* Chart */}
-        <div className="lg:col-span-2 p-6 rounded-2xl border border-border bg-card/50 glass">
-          <div className="flex items-center justify-between mb-6">
-            <h2 className="text-lg font-bold">주간 활동 내역</h2>
-            <select className="bg-background border border-border rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-primary">
-              <option>최근 7일</option>
-              <option>이번 달</option>
-              <option>올해</option>
-            </select>
+      {/* Results */}
+      {results && (
+        <div className="space-y-6 pt-8 border-t border-border/50">
+          <div className="flex items-center justify-between">
+            <h2 className="text-2xl font-bold flex items-center gap-2">
+              <CheckCircle2 className="w-6 h-6 text-emerald-500" />
+              생성 완료: Top 10 콘텐츠
+            </h2>
+            <button className="text-sm px-4 py-2 bg-muted hover:bg-muted/80 rounded-lg font-medium transition-colors">
+              모두 자동 게시
+            </button>
           </div>
-          <div className="h-[300px] w-full">
-            <ResponsiveContainer width="100%" height="100%">
-              <AreaChart data={mockData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
-                <defs>
-                  <linearGradient id="colorCrawled" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="5%" stopColor="#8b5cf6" stopOpacity={0.3}/>
-                    <stop offset="95%" stopColor="#8b5cf6" stopOpacity={0}/>
-                  </linearGradient>
-                  <linearGradient id="colorPosted" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="5%" stopColor="#ec4899" stopOpacity={0.3}/>
-                    <stop offset="95%" stopColor="#ec4899" stopOpacity={0}/>
-                  </linearGradient>
-                </defs>
-                <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" vertical={false} />
-                <XAxis dataKey="name" stroke="hsl(var(--muted-foreground))" fontSize={12} tickLine={false} axisLine={false} />
-                <YAxis stroke="hsl(var(--muted-foreground))" fontSize={12} tickLine={false} axisLine={false} />
-                <Tooltip 
-                  contentStyle={{ backgroundColor: 'hsl(var(--card))', borderColor: 'hsl(var(--border))', borderRadius: '0.75rem' }}
-                  itemStyle={{ color: 'hsl(var(--foreground))' }}
-                />
-                <Area type="monotone" dataKey="수집" stroke="#8b5cf6" strokeWidth={3} fillOpacity={1} fill="url(#colorCrawled)" />
-                <Area type="monotone" dataKey="게시" stroke="#ec4899" strokeWidth={3} fillOpacity={1} fill="url(#colorPosted)" />
-              </AreaChart>
-            </ResponsiveContainer>
-          </div>
-        </div>
 
-        {/* Recent Keywords */}
-        <div className="p-6 rounded-2xl border border-border bg-card/50 glass">
-          <div className="flex items-center justify-between mb-6">
-            <h2 className="text-lg font-bold">인기 키워드</h2>
-            <Link href="/dashboard/keywords" className="text-sm text-primary hover:underline">
-              전체 보기
-            </Link>
-          </div>
-          <div className="space-y-4">
-            {[
-              { keyword: "AI 마케팅", count: 42, platforms: ["X", "IG"] },
-              { keyword: "ChatGPT 활용", count: 38, platforms: ["X"] },
-              { keyword: "B2B SaaS", count: 25, platforms: ["IG"] },
-              { keyword: "자동화 트렌드", count: 18, platforms: ["X", "IG"] },
-              { keyword: "콘텐츠 크리에이션", count: 15, platforms: ["X"] },
-            ].map((kw, i) => (
-              <div key={i} className="flex items-center justify-between p-3 rounded-xl border border-border/50 bg-background/50 hover:bg-muted/50 transition-colors">
-                <div>
-                  <h4 className="font-medium">{kw.keyword}</h4>
-                  <div className="flex gap-1 mt-1">
-                    {kw.platforms.map(p => (
-                      <span key={p} className="text-[10px] font-medium px-1.5 py-0.5 rounded-md bg-primary/10 text-primary border border-primary/20">
-                        {p}
-                      </span>
-                    ))}
+          <div className="grid md:grid-cols-2 gap-6">
+            {results.map((item) => (
+              <div key={item.id} className="rounded-2xl border border-border bg-card/50 glass overflow-hidden flex flex-col">
+                <div className="p-5 border-b border-border/50 bg-muted/20">
+                  <div className="flex items-center gap-2 mb-2">
+                    <span className="px-2 py-0.5 rounded text-xs font-bold bg-primary text-primary-foreground">
+                      TOP {item.id}
+                    </span>
+                    <h3 className="font-semibold text-lg truncate">{item.topic}</h3>
+                  </div>
+                  <p className="text-sm text-muted-foreground">{item.summary}</p>
+                </div>
+
+                <div className="p-5 flex-1 space-y-6">
+                  {/* Instagram Preview */}
+                  <div className="space-y-3">
+                    <div className="flex items-center gap-2 text-pink-500 font-medium text-sm">
+                      <Instagram className="w-4 h-4" /> Instagram용
+                    </div>
+                    <div className="flex gap-4">
+                      <div className="w-24 h-24 rounded-lg bg-muted flex items-center justify-center flex-shrink-0 border border-border overflow-hidden relative">
+                        {/* eslint-disable-next-line @next/next/no-img-element */}
+                        <img src={item.instagram.imageUrl} alt="preview" className="absolute inset-0 w-full h-full object-cover" />
+                      </div>
+                      <div className="flex-1">
+                        <p className="text-sm bg-muted/30 p-3 rounded-xl whitespace-pre-wrap h-24 overflow-y-auto border border-border/50">
+                          {item.instagram.caption}
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* X Preview */}
+                  <div className="space-y-3">
+                    <div className="flex items-center gap-2 text-blue-500 font-medium text-sm">
+                      <Twitter className="w-4 h-4" /> X (Twitter)용
+                    </div>
+                    <p className="text-sm bg-muted/30 p-3 rounded-xl whitespace-pre-wrap border border-border/50">
+                      {item.x.content}
+                    </p>
                   </div>
                 </div>
-                <div className="text-right">
-                  <div className="font-bold">{kw.count}</div>
-                  <div className="text-xs text-muted-foreground">기사</div>
+
+                <div className="p-4 border-t border-border/50 bg-muted/10 grid grid-cols-2 gap-3">
+                  <button className="flex items-center justify-center gap-2 py-2 rounded-lg bg-pink-500 text-white font-medium hover:bg-pink-600 transition-colors text-sm">
+                    <Instagram className="w-4 h-4" /> IG 게시
+                  </button>
+                  <button className="flex items-center justify-center gap-2 py-2 rounded-lg bg-blue-500 text-white font-medium hover:bg-blue-600 transition-colors text-sm">
+                    <Twitter className="w-4 h-4" /> X 게시
+                  </button>
                 </div>
               </div>
             ))}
           </div>
         </div>
-      </div>
+      )}
     </div>
   );
 }
